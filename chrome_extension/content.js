@@ -114,16 +114,33 @@ function extractArgosNotesFromShadowDOM(doc = document) {
         ccItems.forEach((item, idx) => {
             const shadow = item.shadowRoot;
             if (shadow) {
-                const titleEl = shadow.querySelector('.content__title, .title, header');
+                // Extraer Fecha / Hora desde atributos del elemento <cc-item> o elementos internos del shadowRoot
+                const attrDate = item.getAttribute('date') || item.getAttribute('data-date') || item.getAttribute('created') || item.getAttribute('timestamp') || item.getAttribute('fecha');
+                const dateEl = shadow.querySelector('.content__date, .date, time, [class*="date"], [class*="time"], [class*="header__date"], .header__time, .item__date');
+                const titleEl = shadow.querySelector('.content__title, .title, header, .content__header, .header');
                 const descEl = shadow.querySelector('.content__description, .description, .content');
-                
+
+                const dateText = dateEl ? (dateEl.innerText || dateEl.textContent).trim() : (attrDate || "");
                 const titleText = titleEl ? (titleEl.innerText || titleEl.textContent).trim() : "";
                 const descText = descEl ? (descEl.innerText || descEl.textContent).trim() : (shadow.innerText || shadow.textContent).trim();
 
-                if (descText && descText.length > 5) {
-                    const header = titleText ? `--- NOTA: ${titleText} ---` : `--- NOTA CLÍNICA ${idx + 1} ---`;
-                    notes.push(`${header}\n${descText}`);
+                // Búsqueda de patrón de fecha DD/MM/YYYY o YYYY-MM-DD o DD-MM-YYYY en cualquier parte del shadow header
+                let fechaEncontrada = dateText;
+                if (!fechaEncontrada) {
+                    const fullHeaderText = (titleText + " " + (shadow.firstElementChild ? shadow.firstElementChild.innerText : "")).trim();
+                    const matchFecha = fullHeaderText.match(/\b(0?[1-9]|[12][0-9]|3[01])[\/\.-](0?[1-9]|1[012])[\/\.-](19|20)\d\d(?:\s+(?:a\s+las\s+)?\d{1,2}:\d{2}(?::\d{2})?)?\b/i);
+                    if (matchFecha) fechaEncontrada = matchFecha[0];
                 }
+
+                if (descText && descText.length > 5) {
+                    let headerInfo = [];
+                    if (fechaEncontrada) headerInfo.push(`FECHA: ${fechaEncontrada}`);
+                    if (titleText && titleText !== fechaEncontrada) headerInfo.push(titleText);
+
+                    const headerStr = headerInfo.length > 0 ? headerInfo.join(" | ") : `NOTA CLÍNICA ${idx + 1}`;
+                    notes.push(`--- NOTA [${headerStr}] ---\n${descText}`);
+                }
+
             }
         });
 
@@ -150,6 +167,7 @@ function extractArgosNotesFromShadowDOM(doc = document) {
     scanRoot(doc);
     return notes;
 }
+
 
 // Función global de extracción completa
 function getFullArgosExtraction(doc = document) {
