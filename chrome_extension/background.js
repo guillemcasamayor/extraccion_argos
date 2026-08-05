@@ -1,35 +1,38 @@
 // Background Service Worker: Registro de Menú Contextual y Auto-Apertura Copilot
 
 chrome.runtime.onInstalled.addListener(() => {
-    // Menú Principal al hacer Clic Derecho
-    chrome.contextMenus.create({
-        id: "RIS_LLM_PARENT",
-        title: "🧠 Resumir Historia RIS con LLM",
-        contexts: ["page", "selection", "frame"]
-    });
+    // Limpiar menús anteriores para evitar error de ID duplicado al recargar la extensión
+    chrome.contextMenus.removeAll(() => {
+        // Menú Principal al hacer Clic Derecho
+        chrome.contextMenus.create({
+            id: "RIS_LLM_PARENT",
+            title: "🧠 Resumir Historia RIS con LLM",
+            contexts: ["page", "selection", "frame"]
+        });
 
-    // Opción 1: LLM Local
-    chrome.contextMenus.create({
-        parentId: "RIS_LLM_PARENT",
-        id: "SUMMARIZE_LOCAL",
-        title: "🚀 Inferencia Local (Ollama - Qwen 2.5 / Llama 3.3)",
-        contexts: ["page", "selection", "frame"]
-    });
+        // Opción 1: LLM Local
+        chrome.contextMenus.create({
+            parentId: "RIS_LLM_PARENT",
+            id: "SUMMARIZE_LOCAL",
+            title: "🚀 Inferencia Local (Ollama - Qwen 2.5 / Llama 3.3)",
+            contexts: ["page", "selection", "frame"]
+        });
 
-    // Opción 2: API Copilot
-    chrome.contextMenus.create({
-        parentId: "RIS_LLM_PARENT",
-        id: "SUMMARIZE_API",
-        title: "☁️ API Corporativa (Copilot / Azure OpenAI - RGPD)",
-        contexts: ["page", "selection", "frame"]
-    });
+        // Opción 2: API Copilot
+        chrome.contextMenus.create({
+            parentId: "RIS_LLM_PARENT",
+            id: "SUMMARIZE_API",
+            title: "☁️ API Corporativa (Copilot / Azure OpenAI - RGPD)",
+            contexts: ["page", "selection", "frame"]
+        });
 
-    // Opción 3: Abrir Copilot Chat Web y Autopegar Prompt
-    chrome.contextMenus.create({
-        parentId: "RIS_LLM_PARENT",
-        id: "OPEN_AND_PASTE_COPILOT",
-        title: "🚀 Abrir Copilot Chat Web y AUTOPEGAR Prompt Anonimizado",
-        contexts: ["page", "selection", "frame"]
+        // Opción 3: Abrir Copilot Chat Web y Autopegar Prompt
+        chrome.contextMenus.create({
+            parentId: "RIS_LLM_PARENT",
+            id: "OPEN_AND_PASTE_COPILOT",
+            title: "🚀 Abrir Copilot Chat Web y AUTOPEGAR Prompt Anonimizado",
+            contexts: ["page", "selection", "frame"]
+        });
     });
 });
 
@@ -48,15 +51,32 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         model = "copilot-chat";
     }
 
-    // Comunicar con la pestaña activa (SAP)
+    // Comunicar con la pestaña activa (SAP) de forma segura
     chrome.tabs.sendMessage(tab.id, {
         action: "EXTRACT_AND_SUMMARIZE",
         engine: engine,
         model: model,
         selectionText: info.selectionText || "",
         autoOpenCopilot: (info.menuItemId === "OPEN_AND_PASTE_COPILOT")
-    }).catch(err => {
-        console.error("Error al comunicar con la pestaña:", err);
+    }, (response) => {
+        if (chrome.runtime.lastError) {
+            console.warn("Script de contenido no listo en esta página. Inyectando dinámicamente...");
+            // Si la página se abrió antes de cargar la extensión, inyectamos content.js dinámicamente
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ["content.js"]
+            }).then(() => {
+                setTimeout(() => {
+                    chrome.tabs.sendMessage(tab.id, {
+                        action: "EXTRACT_AND_SUMMARIZE",
+                        engine: engine,
+                        model: model,
+                        selectionText: info.selectionText || "",
+                        autoOpenCopilot: (info.menuItemId === "OPEN_AND_PASTE_COPILOT")
+                    });
+                }, 200);
+            }).catch(err => console.error("Error al inyectar script:", err));
+        }
     });
 });
 
