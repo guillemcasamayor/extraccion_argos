@@ -81,25 +81,34 @@ function findCopilotInput() {
 }
 
 function showCopilotSuccessNotification() {
-    const notif = document.createElement("div");
+    let notif = document.getElementById("ris-copilot-notif");
+    if (notif) notif.remove();
+
+    notif = document.createElement("div");
+    notif.id = "ris-copilot-notif";
     notif.style.position = "fixed";
     notif.style.top = "20px";
     notif.style.left = "50%";
     notif.style.transform = "translateX(-50%)";
     notif.style.zIndex = "999999";
-    notif.style.backgroundColor = "#059669";
+    notif.style.backgroundColor = "#0284c7";
     notif.style.color = "#ffffff";
-    notif.style.padding = "14px 28px";
-    notif.style.borderRadius = "8px";
-    notif.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+    notif.style.padding = "16px 30px";
+    notif.style.borderRadius = "10px";
+    notif.style.boxShadow = "0 10px 30px rgba(0,0,0,0.4)";
     notif.style.fontFamily = "system-ui, sans-serif";
     notif.style.fontSize = "15px";
     notif.style.fontWeight = "bold";
-    notif.innerHTML = "✨ ¡Historia clínica anonimizada pegada en Copilot! Pulsa Enter para enviar.";
+    notif.style.textAlign = "center";
+    notif.style.border = "1px solid #38bdf8";
+    notif.innerHTML = "📋 <strong>Prompt anonimizado listo en tu portapapeles</strong><br><span style='font-size:13px; font-weight:normal; opacity:0.95;'>Haz clic en la caja de chat de Copilot y presiona <strong>Ctrl + V</strong> y <strong>Enter</strong> para enviar.</span>";
     document.body.appendChild(notif);
 
-    setTimeout(() => notif.remove(), 6000);
+    setTimeout(() => {
+        if (notif) notif.remove();
+    }, 10000);
 }
+
 
 
 // Función para extraer notas de Argos / SAP atravesando el Shadow DOM (<cc-item>)
