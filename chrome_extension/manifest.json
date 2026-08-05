@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "RIS LLM Clinical Summarizer",
+  "version": "1.2",
+  "description": "Extracción de datos de SAP en Chrome, anonimización local RGPD y auto-apertura/pegado en Copilot Chat.",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:5000/*",
+    "https://m365.cloud.microsoft/*",
+    "https://copilot.microsoft.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

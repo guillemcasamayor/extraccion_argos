@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 280px;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 16px;
+      background-color: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+    }
+    h3 {
+      margin-top: 0;
+      font-size: 15px;
+      color: #38bdf8;
+    }
+    label {
+      font-size: 12px;
+      color: #94a3b8;
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background-color: #1e293b;
+      color: #fff;
+      font-size: 13px;
+    }
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      background-color: #0284c7;
+      color: #white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button:hover {
+      background-color: #0369a1;
+    }
+  </style>
+</head>
+<body>
+  <h3>🧠 RIS LLM Summarizer</h3>
+  
+  <label for="engine">Motor LLM:</label>
+  <select id="engine">
+    <option value="local">Ollama (100% Local On-Premise)</option>
+    <option value="api">Copilot API (Azure RGPD / HIPAA)</option>
+  </select>
+
+  <label for="model">Modelo:</label>
+  <select id="model">
+    <option value="qwen2.5:7b-instruct">Qwen 2.5 7B (Local)</option>
+    <option value="llama3.3:70b">Llama 3.3 70B (Local)</option>
+    <option value="deepseek-r1:7b">DeepSeek R1 Distill (Local)</option>
+    <option value="gpt-4o">GPT-4o (Azure API)</option>
+  </select>
+
+  <button id="btn-summarize">🚀 Extraer y Resumir SAP</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
